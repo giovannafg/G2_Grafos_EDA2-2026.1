@@ -52,7 +52,10 @@ engine.stdout.on('data', (chunk) => {
       payload = { error: 'Resposta invalida do motor C.', raw: line };
     }
 
-    currentState = payload.error ? currentState : payload;
+    if (!payload.error && payload.type !== 'hint') {
+      currentState = payload;
+    }
+    
     const resolve = pending.shift();
     if (resolve) resolve(payload);
   }
@@ -150,6 +153,12 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'POST' && url.pathname === '/api/flag') {
       const body = await readJson(req);
       sendJson(res, 200, await sendCommand(`FLAG ${Number(body.row)} ${Number(body.col)}`));
+      return;
+    }
+
+    if (req.method === 'POST' && url.pathname === '/api/hint') {
+      const body = await readJson(req);
+      sendJson(res, 200, await sendCommand(`HINT ${Number(body.row)} ${Number(body.col)}`));
       return;
     }
 

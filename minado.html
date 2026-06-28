@@ -43,6 +43,7 @@
     flex-direction:column;
     align-items:center;
     padding:28px 16px 60px;
+    overflow-x: hidden;
   }
 
   /* ---------- HEADER ---------- */
@@ -202,14 +203,17 @@
 
   .board-wrap{
     width:100%;
-    overflow-x:auto;
+    overflow: hidden;
     padding-bottom:4px;
+    display: flex;
+    justify-content: center;
   }
   .board-grid{
     display:inline-grid;
     gap:1px;
     background:var(--line);
     border:1px solid var(--line);
+    margin: 0 auto;
   }
   .label-cell{
     width:var(--cell);
@@ -272,6 +276,28 @@
   }
   .back-btn:hover{ color:var(--khaki); }
   .back-btn:focus-visible{ outline:2px solid var(--amber); outline-offset:2px; }
+
+  /* ---------- ESTILOS DA DICA (BFS) ---------- */
+  .hint-path { 
+    background: rgba(226, 163, 61, 0.4) !important; 
+    outline: 2px solid var(--amber); 
+    outline-offset: -2px; 
+    z-index: 2; 
+  }
+  .hint-bomb { 
+    background: rgba(193, 67, 46, 0.6) !important; 
+    outline: 2px solid var(--danger); 
+    outline-offset: -2px; 
+    z-index: 2; 
+  }
+  .board-wrap.hint-active-mode {
+    outline: 3px dashed var(--amber);
+    outline-offset: 4px;
+    cursor: crosshair;
+  }
+  .board-wrap.hint-active-mode .cell {
+    cursor: crosshair !important;
+  }
 
   /* ---------- OVERLAY / MISSION REPORT ---------- */
   .overlay{
@@ -381,6 +407,7 @@
   <section id="screen-game" class="panel game-panel hidden">
     <div class="hud">
       <div class="hud-item">🚩 <span id="flagsLeft">0</span></div>
+      <button id="hintBtn" class="hud-item" style="cursor:pointer; background:var(--amber); color:var(--bg-2); border:none;" title="Solicitar Oráculo">💡</button>
       <button id="resetBtn" class="hud-reset" aria-label="Reiniciar missão">REINICIAR</button>
       <div class="hud-item">⏱ <span id="timer">00:00</span></div>
     </div>
@@ -406,6 +433,17 @@
     </div>
   </div>
 
+  <div id="hintModal" class="overlay hidden">
+    <div class="report-card">
+      <h2 class="stamp" style="font-size:24px; color:var(--amber); border-color:var(--amber); animation:none; transform:none; margin-bottom:12px;">ORÁCULO TÁTICO</h2>
+      <p class="report-text">Ativar a Busca em Largura (BFS)?<br><br>Após confirmar, clique numa casa. O sistema traçará a rota mais curta até à ameaça mais próxima.</p>
+      <div style="display:flex; gap:10px; justify-content:center;">
+        <button id="hintCancel" class="play-again" style="background:var(--panel-2); color:var(--ink);">CANCELAR</button>
+        <button id="hintConfirm" class="play-again">CONFIRMAR</button>
+      </div>
+    </div>
+  </div>
+
   <script>
 (function(){
   const screenSelect = document.getElementById('screen-select');
@@ -418,6 +456,13 @@
   const reportText = document.getElementById('reportText');
   const modeOpenBtn = document.getElementById('modeOpen');
   const modeFlagBtn = document.getElementById('modeFlag');
+  
+  // Variáveis do Oráculo
+  const hintBtn = document.getElementById('hintBtn');
+  const hintModal = document.getElementById('hintModal');
+  const hintCancel = document.getElementById('hintCancel');
+  const hintConfirm = document.getElementById('hintConfirm');
+  const boardWrap = document.querySelector('.board-wrap');
 
   let MAX = 10;
   let currentLevel = 1;
@@ -426,6 +471,9 @@
   let timerInterval = null;
   let secondsElapsed = 0;
   let busy = false;
+  
+  let isHintMode = false;
+  let currentHintPath = [];
 
   function rowLetter(r){ return String.fromCharCode(65 + r); }
 
@@ -451,7 +499,7 @@
   function showError(error){
     stampEl.textContent = 'ERRO';
     stampEl.className = 'stamp lose';
-    reportText.textContent = error.message || 'Nao foi possivel conversar com o jogo em C.';
+    reportText.textContent = error.message || 'Não foi possivel conversar com o jogo em C.';
     overlay.classList.remove('hidden');
   }
 
@@ -482,6 +530,7 @@
   }
 
   function applyState(state){
+    currentHintPath = []; // Limpa o rastro quando o ecrã atualiza
     MAX = state.max;
     board = state.cells;
     flagsLeftEl.textContent = state.flagsLeft;
@@ -510,12 +559,36 @@
   }
 
   function sizeCells(){
-    const available = Math.min(window.innerWidth - 48, 560);
-    const cell = Math.max(16, Math.min(30, Math.floor(available / (MAX + 1))));
+    const espacoLivre = Math.min(window.innerWidth - 32, 560) - 44; 
+    const espacoSemGaps = espacoLivre - MAX; 
+    const cell = Math.max(14, Math.min(30, Math.floor(espacoSemGaps / (MAX + 1))));
+    
     document.documentElement.style.setProperty('--cell', cell + 'px');
-    document.documentElement.style.setProperty('--label', Math.max(16, cell - 4) + 'px');
+    document.documentElement.style.setProperty('--label', cell + 'px'); 
   }
   window.addEventListener('resize', sizeCells);
+
+  async function executeHint(r, c){
+    isHintMode = false;
+    boardWrap.classList.remove('hint-active-mode');
+    if (busy) return;
+    busy = true;
+
+    try {
+      const data = await api('/api/hint', { row: r, col: c });
+      
+      if (data.type === 'hint' && data.path) {
+        currentHintPath = data.path;
+        renderBoard(); // Redesenha com o caminho
+      } else if (data.error) {
+        alert(data.error);
+      }
+    } catch (error) {
+      showError(error);
+    } finally {
+      busy = false;
+    }
+  }
 
   async function openCell(r, c){
     if (busy) return;
@@ -597,6 +670,12 @@
         let cls = 'cell ';
         let content = '';
 
+        // Verifica se a casa faz parte do rastro da dica
+        const hintIndex = currentHintPath.findIndex(p => p.r === r && p.c === c);
+        if (hintIndex !== -1) {
+          cls += (hintIndex === currentHintPath.length - 1) ? 'hint-bomb ' : 'hint-path ';
+        }
+
         if (data.revealed && data.bomb){
           cls += data.exploded ? 'bomb-exploded' : 'bomb-revealed';
           content = data.exploded ? '&#128165;' : '&#128163;';
@@ -616,8 +695,13 @@
         cellEl.innerHTML = content;
 
         cellEl.addEventListener('click', () => {
-          if (mode === 'flag') toggleFlag(r, c);
-          else openCell(r, c);
+          if (isHintMode) {
+            executeHint(r, c);
+          } else if (mode === 'flag') {
+            toggleFlag(r, c);
+          } else {
+            openCell(r, c);
+          }
         });
         cellEl.addEventListener('contextmenu', (e) => {
           e.preventDefault();
@@ -626,7 +710,8 @@
         cellEl.addEventListener('keydown', (e) => {
           if (e.key === 'Enter' || e.key === ' '){
             e.preventDefault();
-            if (mode === 'flag') toggleFlag(r, c);
+            if (isHintMode) executeHint(r, c);
+            else if (mode === 'flag') toggleFlag(r, c);
             else openCell(r, c);
           }
         });
@@ -657,6 +742,22 @@
   document.getElementById('playAgainBtn').addEventListener('click', () => {
     startLevel(currentLevel);
   });
+
+  // Eventos do Oráculo (Dica)
+  hintBtn.addEventListener('click', () => {
+    if (currentLevel) hintModal.classList.remove('hidden');
+  });
+
+  hintCancel.addEventListener('click', () => {
+    hintModal.classList.add('hidden');
+  });
+
+  hintConfirm.addEventListener('click', () => {
+    hintModal.classList.add('hidden');
+    isHintMode = true;
+    boardWrap.classList.add('hint-active-mode');
+  });
+
 })();
 </script>
 </body>
