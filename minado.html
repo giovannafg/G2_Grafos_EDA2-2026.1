@@ -406,5 +406,258 @@
     </div>
   </div>
 
+  <script>
+(function(){
+  const screenSelect = document.getElementById('screen-select');
+  const screenGame = document.getElementById('screen-game');
+  const boardEl = document.getElementById('board');
+  const flagsLeftEl = document.getElementById('flagsLeft');
+  const timerEl = document.getElementById('timer');
+  const overlay = document.getElementById('overlay');
+  const stampEl = document.getElementById('stamp');
+  const reportText = document.getElementById('reportText');
+  const modeOpenBtn = document.getElementById('modeOpen');
+  const modeFlagBtn = document.getElementById('modeFlag');
+
+  let MAX = 10;
+  let currentLevel = 1;
+  let board = [];
+  let mode = 'open';
+  let timerInterval = null;
+  let secondsElapsed = 0;
+  let busy = false;
+
+  function rowLetter(r){ return String.fromCharCode(65 + r); }
+
+  async function api(path, body){
+    const response = await fetch(path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body || {})
+    });
+
+    if (!response.ok){
+      throw new Error('Falha ao conversar com o servidor local.');
+    }
+
+    const data = await response.json();
+    if (data.error){
+      throw new Error(data.error);
+    }
+
+    return data;
+  }
+
+  function showError(error){
+    stampEl.textContent = 'ERRO';
+    stampEl.className = 'stamp lose';
+    reportText.textContent = error.message || 'Nao foi possivel conversar com o jogo em C.';
+    overlay.classList.remove('hidden');
+  }
+
+  async function startLevel(level){
+    if (busy) return;
+    busy = true;
+
+    try {
+      currentLevel = level;
+      overlay.classList.add('hidden');
+      const state = await api('/api/start', { level });
+      applyState(state);
+
+      secondsElapsed = 0;
+      timerEl.textContent = '00:00';
+      clearInterval(timerInterval);
+      startTimer();
+
+      mode = 'open';
+      setMode('open');
+      screenSelect.classList.add('hidden');
+      screenGame.classList.remove('hidden');
+    } catch (error) {
+      showError(error);
+    } finally {
+      busy = false;
+    }
+  }
+
+  function applyState(state){
+    MAX = state.max;
+    board = state.cells;
+    flagsLeftEl.textContent = state.flagsLeft;
+    sizeCells();
+    renderBoard();
+
+    if (state.status === 'won'){
+      winGame();
+    } else if (state.status === 'lost'){
+      loseGame();
+    }
+  }
+
+  function startTimer(){
+    timerInterval = setInterval(() => {
+      secondsElapsed++;
+      const m = String(Math.floor(secondsElapsed / 60)).padStart(2,'0');
+      const s = String(secondsElapsed % 60).padStart(2,'0');
+      timerEl.textContent = m + ':' + s;
+    }, 1000);
+  }
+
+  function stopTimer(){
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+
+  function sizeCells(){
+    const available = Math.min(window.innerWidth - 48, 560);
+    const cell = Math.max(16, Math.min(30, Math.floor(available / (MAX + 1))));
+    document.documentElement.style.setProperty('--cell', cell + 'px');
+    document.documentElement.style.setProperty('--label', Math.max(16, cell - 4) + 'px');
+  }
+  window.addEventListener('resize', sizeCells);
+
+  async function openCell(r, c){
+    if (busy) return;
+    busy = true;
+
+    try {
+      applyState(await api('/api/open', { row:r, col:c }));
+    } catch (error) {
+      showError(error);
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function toggleFlag(r, c){
+    if (busy) return;
+    busy = true;
+
+    try {
+      applyState(await api('/api/flag', { row:r, col:c }));
+    } catch (error) {
+      showError(error);
+    } finally {
+      busy = false;
+    }
+  }
+
+  function loseGame(){
+    stopTimer();
+    stampEl.textContent = 'DETONADO';
+    stampEl.className = 'stamp lose';
+    reportText.textContent = 'O setor explodiu. Missao encerrada pelo motor em C.';
+    overlay.classList.remove('hidden');
+  }
+
+  function winGame(){
+    stopTimer();
+    stampEl.textContent = 'DESARMADO';
+    stampEl.className = 'stamp win';
+    const m = String(Math.floor(secondsElapsed / 60)).padStart(2,'0');
+    const s = String(secondsElapsed % 60).padStart(2,'0');
+    reportText.textContent = 'Setor limpo em ' + m + ':' + s + '. Missao cumprida.';
+    overlay.classList.remove('hidden');
+  }
+
+  function setMode(m){
+    mode = m;
+    modeOpenBtn.classList.toggle('active', m === 'open');
+    modeFlagBtn.classList.toggle('active', m === 'flag');
+  }
+
+  function renderBoard(){
+    boardEl.style.gridTemplateColumns = 'var(--label) repeat(' + MAX + ', var(--cell))';
+    boardEl.innerHTML = '';
+
+    const corner = document.createElement('div');
+    corner.className = 'label-cell corner';
+    boardEl.appendChild(corner);
+    for (let c = 0; c < MAX; c++){
+      const lbl = document.createElement('div');
+      lbl.className = 'label-cell';
+      lbl.textContent = String(c + 1).padStart(2,'0');
+      boardEl.appendChild(lbl);
+    }
+
+    for (let r = 0; r < MAX; r++){
+      const rowLbl = document.createElement('div');
+      rowLbl.className = 'row-label';
+      rowLbl.textContent = rowLetter(r);
+      boardEl.appendChild(rowLbl);
+
+      for (let c = 0; c < MAX; c++){
+        const data = board[r][c];
+        const cellEl = document.createElement('div');
+        cellEl.tabIndex = 0;
+        cellEl.setAttribute('role','gridcell');
+        cellEl.setAttribute('aria-label', rowLetter(r) + (c+1));
+
+        let cls = 'cell ';
+        let content = '';
+
+        if (data.revealed && data.bomb){
+          cls += data.exploded ? 'bomb-exploded' : 'bomb-revealed';
+          content = data.exploded ? '&#128165;' : '&#128163;';
+        } else if (data.revealed){
+          cls += 'revealed';
+          if (data.count > 0){
+            content = '<span class="n' + data.count + '">' + data.count + '</span>';
+          }
+        } else if (data.flagged){
+          cls += 'flagged';
+          content = '&#128681;';
+        } else {
+          cls += 'closed';
+        }
+
+        cellEl.className = cls;
+        cellEl.innerHTML = content;
+
+        cellEl.addEventListener('click', () => {
+          if (mode === 'flag') toggleFlag(r, c);
+          else openCell(r, c);
+        });
+        cellEl.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          toggleFlag(r, c);
+        });
+        cellEl.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' '){
+            e.preventDefault();
+            if (mode === 'flag') toggleFlag(r, c);
+            else openCell(r, c);
+          }
+        });
+
+        boardEl.appendChild(cellEl);
+      }
+    }
+  }
+
+  document.querySelectorAll('.mission-card').forEach(btn => {
+    btn.addEventListener('click', () => startLevel(Number(btn.dataset.level)));
+  });
+
+  modeOpenBtn.addEventListener('click', () => setMode('open'));
+  modeFlagBtn.addEventListener('click', () => setMode('flag'));
+
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    startLevel(currentLevel);
+  });
+
+  document.getElementById('backBtn').addEventListener('click', () => {
+    stopTimer();
+    overlay.classList.add('hidden');
+    screenGame.classList.add('hidden');
+    screenSelect.classList.remove('hidden');
+  });
+
+  document.getElementById('playAgainBtn').addEventListener('click', () => {
+    startLevel(currentLevel);
+  });
+})();
+</script>
 </body>
 </html>
