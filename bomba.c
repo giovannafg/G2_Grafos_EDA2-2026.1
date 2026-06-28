@@ -123,3 +123,70 @@ Vertice desenfileirar(Fila *f) {
 int fila_vazia(Fila *f) {
     return f->inicio == f->fim;
 }
+
+int buscar_caminho_bomba_bfs(int MAX, casa matrix[MAX][MAX], Vertice inicio, Vertice caminho_encontrado[]) {
+    Fila fila;
+    inicializar_fila(&fila);
+
+    //matriz para rastrear quais casas já foram visitadas (evita loop infinito)
+    int visitado[MAX][MAX];
+    
+    //anota de onde veio
+    Vertice origem[MAX][MAX];
+
+    for (int i = 0; i < MAX; i++) {
+        for (int j = 0; j < MAX; j++) {
+            visitado[i][j] = 0;
+            origem[i][j] = (Vertice){-1, -1}; // -1 significa que não tem origem ainda
+        }
+    }
+
+    enfileirar(&fila, inicio);
+    visitado[inicio.linha][inicio.coluna] = 1;
+
+    Vertice bomba_encontrada = {-1, -1};
+
+    while (!fila_vazia(&fila)) {
+        Vertice atual = desenfileirar(&fila);
+
+        // Achou a bomba mais próxima Pausa a busca.
+        if (matrix[atual.linha][atual.coluna].boolean == 1) {
+            bomba_encontrada = atual;
+            break; 
+        }
+        Aresta arestas[8];
+        int total_arestas = obter_arestas_do_vertice(MAX, atual, arestas);
+
+        for (int i = 0; i < total_arestas; i++) {
+            Vertice vizinho = arestas[i].destino;
+
+            //se o vizinho ainda não foi visitado, coloca na Fila
+            if (visitado[vizinho.linha][vizinho.coluna] == 0) {
+                visitado[vizinho.linha][vizinho.coluna] = 1;
+                origem[vizinho.linha][vizinho.coluna] = atual; //salva quem descobriu ele
+                enfileirar(&fila, vizinho);
+            }
+        }
+    }
+    if (bomba_encontrada.linha == -1) {
+        return 0; 
+    }
+    
+    //reconstruindo a rota
+    int tamanho_caminho = 0;
+    Vertice passo = bomba_encontrada;
+    while (passo.linha != inicio.linha || passo.coluna != inicio.coluna) {
+        caminho_encontrado[tamanho_caminho] = passo;
+        tamanho_caminho++;
+        passo = origem[passo.linha][passo.coluna];
+    }
+    caminho_encontrado[tamanho_caminho] = inicio;
+    tamanho_caminho++;
+
+    for (int i = 0; i < tamanho_caminho / 2; i++) {
+        Vertice temp = caminho_encontrado[i];
+        caminho_encontrado[i] = caminho_encontrado[tamanho_caminho - 1 - i];
+        caminho_encontrado[tamanho_caminho - 1 - i] = temp;
+    }
+    return tamanho_caminho;
+}
