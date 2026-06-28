@@ -103,3 +103,23 @@ int vitoria(int MAX, casa matrix[MAX][MAX], int num_bombas){
     }
     return 0;
 }
+
+void inicializar_fila(Fila *f) {
+    f->inicio = 0;
+    f->fim = 0;
+}
+
+void enfileirar(Fila *f, Vertice v) {
+    f->dados[f->fim] = v;
+    f->fim++;
+}
+
+Vertice desenfileirar(Fila *f) {
+    Vertice v = f->dados[f->inicio];
+    f->inicio++;
+    return v;
+}
+
+int fila_vazia(Fila *f) {
+    return f->inicio == f->fim;
+}
