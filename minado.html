@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campo Minado — Operação Limpeza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil:wght@600;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <header class="briefing">
+    <p class="eyebrow">Setor tático</p>
+    <h1 class="title">Campo Minado</h1>
+    <p class="subtitle">Mapeie o perímetro sem detonar nada. Cada bandeira é uma aposta sobre onde está o perigo.</p>
+  </header>
+
+  <section id="screen-select" class="panel">
+    <p class="panel-label">Selecione o nível de risco</p>
+    <div class="mission-cards">
+      <button class="mission-card" data-level="1">
+        <span class="mission-rank">Risco baixo</span>
+        <span class="mission-name">Fácil</span>
+        <span class="mission-stats">10×10 · 10 minas</span>
+      </button>
+      <button class="mission-card" data-level="2">
+        <span class="mission-rank">Risco médio</span>
+        <span class="mission-name">Intermediário</span>
+        <span class="mission-stats">15×15 · 35 minas</span>
+      </button>
+      <button class="mission-card" data-level="3">
+        <span class="mission-rank">Risco alto</span>
+        <span class="mission-name">Difícil</span>
+        <span class="mission-stats">20×20 · 90 minas</span>
+      </button>
+    </div>
+  </section>
+
+  <section id="screen-game" class="panel game-panel hidden">
+    <div class="hud">
+      <div class="hud-item">🚩 <span id="flagsLeft">0</span></div>
+      <button id="resetBtn" class="hud-reset" aria-label="Reiniciar missão">REINICIAR</button>
+      <div class="hud-item">⏱ <span id="timer">00:00</span></div>
+    </div>
+    <div class="mode-toggle">
+      <button id="modeOpen" class="mode-btn active">ABRIR</button>
+      <button id="modeFlag" class="mode-btn">BANDEIRA</button>
+    </div>
+    <div class="board-wrap">
+      <div id="board" class="board-grid" role="grid"></div>
+    </div>
+    <button id="backBtn" class="back-btn">← trocar nível</button>
+  </section>
+
+  <footer class="note">
+    Toque numa casa para abrir. No computador, clique com o botão direito para marcar bandeira — no celular, use o botão "BANDEIRA" acima.
+  </footer>
+
+  <div id="overlay" class="overlay hidden">
+    <div class="report-card">
+      <div id="stamp" class="stamp">DESARMADO</div>
+      <p id="reportText" class="report-text">Setor limpo.</p>
+      <button id="playAgainBtn" class="play-again">NOVA MISSÃO</button>
+    </div>
+  </div>
+
+</body>
+</html>
