@@ -1,380 +1,540 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Campo Minado — Operação Limpeza</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil:wght@600;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#12160F;
-    --bg-2:#0E110C;
-    --panel:#1B2116;
-    --panel-2:#212A1B;
-    --line:#384330;
-    --line-soft:#2A3324;
-    --khaki:#C7B88A;
-    --khaki-dim:#8B8466;
-    --amber:#E2A33D;
-    --danger:#C1432E;
-    --ok:#7AAE63;
-    --ink:#EDE8DC;
-    --ink-dim:#9AA08C;
-    --stencil:'Big Shoulders Stencil', sans-serif;
-    --mono:'Space Mono', monospace;
-    --cell: 30px;
-    --label: 22px;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campo Minado — Operação Limpeza</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil:wght@600;800&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #12160F;
+      --bg-2: #0E110C;
+      --panel: #1B2116;
+      --panel-2: #212A1B;
+      --line: #384330;
+      --line-soft: #2A3324;
+      --khaki: #C7B88A;
+      --khaki-dim: #8B8466;
+      --amber: #E2A33D;
+      --danger: #C1432E;
+      --ok: #7AAE63;
+      --ink: #EDE8DC;
+      --ink-dim: #9AA08C;
+      --stencil: 'Big Shoulders Stencil', sans-serif;
+      --mono: 'Space Mono', monospace;
+      --cell: 30px;
+      --label: 22px;
+    }
 
-  *{ box-sizing:border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
-  body{
-    margin:0;
-    min-height:100vh;
-    background-color:var(--bg);
-    background-image:
-      linear-gradient(var(--line-soft) 1px, transparent 1px),
-      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
-    background-size: 26px 26px;
-    color:var(--ink);
-    font-family:var(--mono);
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    padding:28px 16px 60px;
-    overflow-x: hidden;
-  }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background-color: var(--bg);
+      background-image:
+        linear-gradient(var(--line-soft) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+      background-size: 26px 26px;
+      color: var(--ink);
+      font-family: var(--mono);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 28px 16px 60px;
+      overflow-x: hidden;
+    }
 
-  /* ---------- HEADER ---------- */
-  header.briefing{
-    text-align:center;
-    margin-bottom:22px;
-    max-width:560px;
-  }
-  .eyebrow{
-    font-size:11px;
-    letter-spacing:.22em;
-    color:var(--amber);
-    margin:0 0 6px;
-    text-transform:uppercase;
-  }
-  .title{
-    font-family:var(--stencil);
-    font-weight:800;
-    font-size:clamp(40px,9vw,64px);
-    letter-spacing:.04em;
-    margin:0;
-    color:var(--ink);
-    text-shadow: 2px 2px 0 var(--bg-2);
-  }
-  .subtitle{
-    font-size:13px;
-    color:var(--ink-dim);
-    margin:8px 0 0;
-    line-height:1.5;
-  }
+    /* ---------- HEADER ---------- */
+    header.briefing {
+      text-align: center;
+      margin-bottom: 22px;
+      max-width: 560px;
+    }
 
-  /* ---------- PANELS ---------- */
-  .panel{
-    background:var(--panel);
-    border:1px solid var(--line);
-    border-radius:4px;
-    padding:22px;
-    width:100%;
-    max-width:560px;
-  }
-  .panel-label{
-    font-size:11px;
-    letter-spacing:.18em;
-    color:var(--khaki-dim);
-    text-transform:uppercase;
-    margin:0 0 16px;
-    text-align:center;
-  }
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: .22em;
+      color: var(--amber);
+      margin: 0 0 6px;
+      text-transform: uppercase;
+    }
 
-  /* ---------- MISSION SELECT ---------- */
-  .mission-cards{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-  }
-  .mission-card{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-    background:var(--panel-2);
-    border:1px solid var(--line);
-    border-left:4px solid var(--khaki-dim);
-    color:var(--ink);
-    font-family:var(--mono);
-    padding:14px 16px;
-    cursor:pointer;
-    text-align:left;
-    transition:border-color .15s ease, transform .1s ease, background .15s ease;
-  }
-  .mission-card:hover{
-    border-left-color:var(--amber);
-    background:#252f1d;
-  }
-  .mission-card:active{ transform:scale(.99); }
-  .mission-card:focus-visible{ outline:2px solid var(--amber); outline-offset:2px; }
-  .mission-rank{
-    font-size:10px;
-    letter-spacing:.14em;
-    color:var(--amber);
-    text-transform:uppercase;
-    min-width:108px;
-  }
-  .mission-name{
-    font-family:var(--stencil);
-    font-weight:700;
-    font-size:20px;
-    flex:1;
-    text-align:left;
-  }
-  .mission-stats{
-    font-size:12px;
-    color:var(--ink-dim);
-  }
+    .title {
+      font-family: var(--stencil);
+      font-weight: 800;
+      font-size: clamp(40px, 9vw, 64px);
+      letter-spacing: .04em;
+      margin: 0;
+      color: var(--ink);
+      text-shadow: 2px 2px 0 var(--bg-2);
+    }
 
-  /* ---------- GAME SCREEN ---------- */
-  .game-panel{ display:flex; flex-direction:column; align-items:center; gap:14px; }
+    .subtitle {
+      font-size: 13px;
+      color: var(--ink-dim);
+      margin: 8px 0 0;
+      line-height: 1.5;
+    }
 
-  .hud{
-    width:100%;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-  }
-  .hud-item{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    font-size:14px;
-    background:var(--panel-2);
-    border:1px solid var(--line);
-    padding:6px 10px;
-    border-radius:3px;
-    min-width:64px;
-    justify-content:center;
-  }
-  .hud-reset{
-    font-family:var(--stencil);
-    font-weight:700;
-    font-size:13px;
-    letter-spacing:.06em;
-    background:var(--danger);
-    color:var(--ink);
-    border:1px solid #8c2d1c;
-    border-radius:3px;
-    padding:8px 14px;
-    cursor:pointer;
-  }
-  .hud-reset:hover{ filter:brightness(1.1); }
-  .hud-reset:focus-visible{ outline:2px solid var(--amber); outline-offset:2px; }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 22px;
+      width: 100%;
+      max-width: 560px;
+    }
 
-  .mode-toggle{
-    display:flex;
-    border:1px solid var(--line);
-    border-radius:3px;
-    overflow:hidden;
-    width:100%;
-  }
-  .mode-btn{
-    flex:1;
-    background:var(--panel-2);
-    color:var(--ink-dim);
-    font-family:var(--mono);
-    font-size:12px;
-    letter-spacing:.1em;
-    border:none;
-    padding:9px 0;
-    cursor:pointer;
-  }
-  .mode-btn.active{
-    background:var(--khaki);
-    color:var(--bg-2);
-    font-weight:700;
-  }
-  .mode-btn:focus-visible{ outline:2px solid var(--amber); outline-offset:-2px; }
+    .panel-label {
+      font-size: 11px;
+      letter-spacing: .18em;
+      color: var(--khaki-dim);
+      text-transform: uppercase;
+      margin: 0 0 16px;
+      text-align: center;
+    }
 
-  .board-wrap{
-    width:100%;
-    overflow: hidden;
-    padding-bottom:4px;
-    display: flex;
-    justify-content: center;
-  }
-  .board-grid{
-    display:inline-grid;
-    gap:1px;
-    background:var(--line);
-    border:1px solid var(--line);
-    margin: 0 auto;
-  }
-  .label-cell{
-    width:var(--cell);
-    height:var(--label);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:11px;
-    color:var(--khaki-dim);
-    background:var(--bg-2);
-  }
-  .label-cell.corner{ width:var(--label); }
-  .row-label{
-    width:var(--label);
-    height:var(--cell);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:11px;
-    color:var(--khaki-dim);
-    background:var(--bg-2);
-  }
+    .mission-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
 
-  .cell{
-    width:var(--cell);
-    height:var(--cell);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:calc(var(--cell) * 0.46);
-    font-weight:700;
-    background:var(--panel-2);
-    color:var(--ink);
-    cursor:pointer;
-    user-select:none;
-    -webkit-user-select:none;
-    touch-action:manipulation;
-  }
-  .cell.closed{ background:#2A3420; }
-  .cell.closed:hover{ background:#33401F; }
-  .cell.revealed{ background:#171C12; cursor:default; }
-  .cell.flagged{ background:#2A3420; }
-  .cell.bomb-revealed{ background:#2A1712; }
-  .cell.bomb-exploded{ background:var(--danger); }
-  .cell:focus-visible{ outline:2px solid var(--amber); outline-offset:-2px; z-index:1; }
+    .mission-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--khaki-dim);
+      color: var(--ink);
+      font-family: var(--mono);
+      padding: 14px 16px;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color .15s ease, transform .1s ease, background .15s ease;
+    }
 
-  .n1{ color:#7FA8C9; } .n2{ color:#7AAE63; } .n3{ color:#C1432E; }
-  .n4{ color:#A07FC9; } .n5{ color:#B07A45; } .n6{ color:#4FAFAF; }
-  .n7{ color:#EDE8DC; } .n8{ color:#9AA08C; }
+    .mission-card:hover {
+      border-left-color: var(--amber);
+      background: #252f1d;
+    }
 
-  .back-btn{
-    background:none;
-    border:none;
-    color:var(--ink-dim);
-    font-family:var(--mono);
-    font-size:12px;
-    letter-spacing:.06em;
-    cursor:pointer;
-    padding:4px;
-  }
-  .back-btn:hover{ color:var(--khaki); }
-  .back-btn:focus-visible{ outline:2px solid var(--amber); outline-offset:2px; }
+    .mission-card:active {
+      transform: scale(.99);
+    }
 
-  /* ---------- ESTILOS DA DICA (BFS) ---------- */
-  .hint-path { 
-    background: rgba(226, 163, 61, 0.4) !important; 
-    outline: 2px solid var(--amber); 
-    outline-offset: -2px; 
-    z-index: 2; 
-  }
-  .hint-bomb { 
-    background: rgba(193, 67, 46, 0.6) !important; 
-    outline: 2px solid var(--danger); 
-    outline-offset: -2px; 
-    z-index: 2; 
-  }
-  .board-wrap.hint-active-mode {
-    outline: 3px dashed var(--amber);
-    outline-offset: 4px;
-    cursor: crosshair;
-  }
-  .board-wrap.hint-active-mode .cell {
-    cursor: crosshair !important;
-  }
+    .mission-card:focus-visible {
+      outline: 2px solid var(--amber);
+      outline-offset: 2px;
+    }
 
-  /* ---------- OVERLAY / MISSION REPORT ---------- */
-  .overlay{
-    position:fixed;
-    inset:0;
-    background:rgba(10,12,8,0.78);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-    z-index:10;
-  }
-  .report-card{
-    background:var(--panel);
-    border:1px solid var(--line);
-    border-radius:4px;
-    padding:32px 28px;
-    text-align:center;
-    max-width:360px;
-    width:100%;
-    position:relative;
-  }
-  .stamp{
-    font-family:var(--stencil);
-    font-weight:800;
-    font-size:clamp(30px,7vw,42px);
-    letter-spacing:.06em;
-    border:4px solid currentColor;
-    border-radius:6px;
-    padding:8px 14px;
-    display:inline-block;
-    transform:rotate(-6deg);
-    margin-bottom:18px;
-    animation: stamp-in .28s ease-out;
-  }
-  .stamp.win{ color:var(--ok); }
-  .stamp.lose{ color:var(--danger); }
-  @keyframes stamp-in{
-    0%{ transform:rotate(-6deg) scale(1.7); opacity:0; }
-    100%{ transform:rotate(-6deg) scale(1); opacity:1; }
-  }
-  @media (prefers-reduced-motion: reduce){
-    .stamp{ animation:none; }
-  }
-  .report-text{
-    font-size:13px;
-    color:var(--ink-dim);
-    line-height:1.6;
-    margin:0 0 22px;
-  }
-  .play-again{
-    font-family:var(--stencil);
-    font-weight:700;
-    font-size:15px;
-    letter-spacing:.05em;
-    background:var(--amber);
-    color:var(--bg-2);
-    border:none;
-    border-radius:3px;
-    padding:11px 22px;
-    cursor:pointer;
-  }
-  .play-again:hover{ filter:brightness(1.08); }
-  .play-again:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+    .mission-rank {
+      font-size: 10px;
+      letter-spacing: .14em;
+      color: var(--amber);
+      text-transform: uppercase;
+      min-width: 108px;
+    }
 
-  .hidden{ display:none !important; }
+    .mission-name {
+      font-family: var(--stencil);
+      font-weight: 700;
+      font-size: 20px;
+      flex: 1;
+      text-align: left;
+    }
 
-  footer.note{
-    margin-top:26px;
-    font-size:11px;
-    color:var(--khaki-dim);
-    text-align:center;
-    max-width:420px;
-    line-height:1.6;
-  }
-</style>
+    .mission-stats {
+      font-size: 12px;
+      color: var(--ink-dim);
+    }
+
+    .game-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .hud {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .hud-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      padding: 6px 10px;
+      border-radius: 3px;
+      min-width: 64px;
+      justify-content: center;
+    }
+
+    .hud-reset {
+      font-family: var(--stencil);
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: .06em;
+      background: var(--danger);
+      color: var(--ink);
+      border: 1px solid #8c2d1c;
+      border-radius: 3px;
+      padding: 8px 14px;
+      cursor: pointer;
+    }
+
+    .hud-reset:hover {
+      filter: brightness(1.1);
+    }
+
+    .hud-reset:focus-visible {
+      outline: 2px solid var(--amber);
+      outline-offset: 2px;
+    }
+
+    .mode-toggle {
+      display: flex;
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .mode-btn {
+      flex: 1;
+      background: var(--panel-2);
+      color: var(--ink-dim);
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: .1em;
+      border: none;
+      padding: 9px 0;
+      cursor: pointer;
+    }
+
+    .mode-btn.active {
+      background: var(--khaki);
+      color: var(--bg-2);
+      font-weight: 700;
+    }
+
+    .mode-btn:focus-visible {
+      outline: 2px solid var(--amber);
+      outline-offset: -2px;
+    }
+
+    .board-wrap {
+      width: 100%;
+      overflow: hidden;
+      padding-bottom: 4px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .board-grid {
+      display: inline-grid;
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+      margin: 0 auto;
+    }
+
+    .label-cell {
+      width: var(--cell);
+      height: var(--label);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: var(--khaki-dim);
+      background: var(--bg-2);
+    }
+
+    .label-cell.corner {
+      width: var(--label);
+    }
+
+    .row-label {
+      width: var(--label);
+      height: var(--cell);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: var(--khaki-dim);
+      background: var(--bg-2);
+    }
+
+    .cell {
+      width: var(--cell);
+      height: var(--cell);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: calc(var(--cell) * 0.46);
+      font-weight: 700;
+      background: var(--panel-2);
+      color: var(--ink);
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+
+    .cell.closed {
+      background: #2A3420;
+    }
+
+    .cell.closed:hover {
+      background: #33401F;
+    }
+
+    .cell.revealed {
+      background: #171C12;
+      cursor: default;
+    }
+
+    .cell.flagged {
+      background: #2A3420;
+    }
+
+    .cell.bomb-revealed {
+      background: #2A1712;
+    }
+
+    .cell.bomb-exploded {
+      background: var(--danger);
+    }
+
+    .cell:focus-visible {
+      outline: 2px solid var(--amber);
+      outline-offset: -2px;
+      z-index: 1;
+    }
+
+    .n1 {
+      color: #7FA8C9;
+    }
+
+    .n2 {
+      color: #7AAE63;
+    }
+
+    .n3 {
+      color: #C1432E;
+    }
+
+    .n4 {
+      color: #A07FC9;
+    }
+
+    .n5 {
+      color: #B07A45;
+    }
+
+    .n6 {
+      color: #4FAFAF;
+    }
+
+    .n7 {
+      color: #EDE8DC;
+    }
+
+    .n8 {
+      color: #9AA08C;
+    }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--ink-dim);
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: .06em;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .back-btn:hover {
+      color: var(--khaki);
+    }
+
+    .back-btn:focus-visible {
+      outline: 2px solid var(--amber);
+      outline-offset: 2px;
+    }
+
+    .hint-path {
+      background: rgba(226, 163, 61, 0.4) !important;
+      outline: 2px solid var(--amber);
+      outline-offset: -2px;
+      z-index: 2;
+    }
+
+    .hint-origin {
+      background: rgba(127, 168, 201, 0.7) !important;
+      outline: 2px solid #7FA8C9;
+      outline-offset: -2px;
+      z-index: 3;
+    }
+
+    .hint-bomb {
+      background: rgba(193, 67, 46, 0.6) !important;
+      outline: 2px solid var(--danger);
+      outline-offset: -2px;
+      z-index: 2;
+    }
+
+    #hintBtn {
+      cursor: pointer;
+      background: transparent;
+      /* Fundo transparente por padrão */
+      color: var(--ink-dim);
+      transition: all 0.2s ease;
+    }
+
+    #hintBtn:hover {
+      border-color: var(--amber);
+    }
+
+    #hintBtn.active {
+      background: var(--amber);
+      /* Fica amarelo quando ativado */
+      border-color: var(--amber);
+    }
+
+    .board-wrap.hint-active-mode {
+      outline: 3px dashed var(--amber);
+      outline-offset: 4px;
+      cursor: crosshair;
+    }
+
+    .board-wrap.hint-active-mode .cell {
+      cursor: crosshair !important;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 12, 8, 0.78);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 10;
+    }
+
+    .report-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 32px 28px;
+      text-align: center;
+      max-width: 360px;
+      width: 100%;
+      position: relative;
+    }
+
+    .stamp {
+      font-family: var(--stencil);
+      font-weight: 800;
+      font-size: clamp(30px, 7vw, 42px);
+      letter-spacing: .06em;
+      border: 4px solid currentColor;
+      border-radius: 6px;
+      padding: 8px 14px;
+      display: inline-block;
+      transform: rotate(-6deg);
+      margin-bottom: 18px;
+      animation: stamp-in .28s ease-out;
+    }
+
+    .stamp.win {
+      color: var(--ok);
+    }
+
+    .stamp.lose {
+      color: var(--danger);
+    }
+
+    @keyframes stamp-in {
+      0% {
+        transform: rotate(-6deg) scale(1.7);
+        opacity: 0;
+      }
+
+      100% {
+        transform: rotate(-6deg) scale(1);
+        opacity: 1;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .stamp {
+        animation: none;
+      }
+    }
+
+    .report-text {
+      font-size: 13px;
+      color: var(--ink-dim);
+      line-height: 1.6;
+      margin: 0 0 22px;
+    }
+
+    .play-again {
+      font-family: var(--stencil);
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: .05em;
+      background: var(--amber);
+      color: var(--bg-2);
+      border: none;
+      border-radius: 3px;
+      padding: 11px 22px;
+      cursor: pointer;
+    }
+
+    .play-again:hover {
+      filter: brightness(1.08);
+    }
+
+    .play-again:focus-visible {
+      outline: 2px solid var(--ink);
+      outline-offset: 2px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    footer.note {
+      margin-top: 26px;
+      font-size: 11px;
+      color: var(--khaki-dim);
+      text-align: center;
+      max-width: 420px;
+      line-height: 1.6;
+    }
+  </style>
 </head>
+
 <body>
 
   <header class="briefing">
@@ -407,7 +567,7 @@
   <section id="screen-game" class="panel game-panel hidden">
     <div class="hud">
       <div class="hud-item">🚩 <span id="flagsLeft">0</span></div>
-      <button id="hintBtn" class="hud-item" style="cursor:pointer; background:var(--amber); color:var(--bg-2); border:none;" title="Solicitar Oráculo">💡</button>
+      <button id="hintBtn" class="hud-item" title="Solicitar Oráculo">💡</button>
       <button id="resetBtn" class="hud-reset" aria-label="Reiniciar missão">REINICIAR</button>
       <div class="hud-item">⏱ <span id="timer">00:00</span></div>
     </div>
@@ -422,7 +582,8 @@
   </section>
 
   <footer class="note">
-    Toque numa casa para abrir. No computador, clique com o botão direito para marcar bandeira — no celular, use o botão "BANDEIRA" acima.
+    Toque numa casa para abrir. No computador, clique com o botão direito para marcar bandeira — no celular, use o botão
+    "BANDEIRA" acima.
   </footer>
 
   <div id="overlay" class="overlay hidden">
@@ -435,330 +596,360 @@
 
   <div id="hintModal" class="overlay hidden">
     <div class="report-card">
-      <h2 class="stamp" style="font-size:24px; color:var(--amber); border-color:var(--amber); animation:none; transform:none; margin-bottom:12px;">ORÁCULO TÁTICO</h2>
-      <p class="report-text">Ativar a Busca em Largura (BFS)?<br><br>Após confirmar, clique numa casa. O sistema traçará a rota mais curta até à ameaça mais próxima.</p>
+      <h2 class="stamp"
+        style="font-size:24px; color:var(--amber); border-color:var(--amber); animation:none; transform:none; margin-bottom:12px;">
+        ORÁCULO TÁTICO</h2>
+      <p class="report-text" style="margin-bottom:10px;">Ativar mapeamento dos perigos?<br><br>Quantas ameaças
+        deseja rastrear?</p>
+
+      <div style="margin-bottom: 20px;">
+        <input type="number" id="hintAmount" value="3" min="1" max="10"
+          style="width: 70px; padding: 8px; text-align: center; background: var(--panel-2); color: var(--amber); border: 1px solid var(--line); border-radius: 4px; font-family: var(--mono); font-size: 18px; font-weight: bold; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);">
+      </div>
+
+      <p class="report-text" style="margin-top:0;">Após confirmar, clique numa casa para traçar a rota para as bombas
+        mais próximas.</p>
+
       <div style="display:flex; gap:10px; justify-content:center;">
-        <button id="hintCancel" class="play-again" style="background:var(--panel-2); color:var(--ink);">CANCELAR</button>
+        <button id="hintCancel" class="play-again"
+          style="background:var(--panel-2); color:var(--ink);">CANCELAR</button>
         <button id="hintConfirm" class="play-again">CONFIRMAR</button>
       </div>
     </div>
   </div>
 
   <script>
-(function(){
-  const screenSelect = document.getElementById('screen-select');
-  const screenGame = document.getElementById('screen-game');
-  const boardEl = document.getElementById('board');
-  const flagsLeftEl = document.getElementById('flagsLeft');
-  const timerEl = document.getElementById('timer');
-  const overlay = document.getElementById('overlay');
-  const stampEl = document.getElementById('stamp');
-  const reportText = document.getElementById('reportText');
-  const modeOpenBtn = document.getElementById('modeOpen');
-  const modeFlagBtn = document.getElementById('modeFlag');
-  
-  // Variáveis do Oráculo
-  const hintBtn = document.getElementById('hintBtn');
-  const hintModal = document.getElementById('hintModal');
-  const hintCancel = document.getElementById('hintCancel');
-  const hintConfirm = document.getElementById('hintConfirm');
-  const boardWrap = document.querySelector('.board-wrap');
+    (function () {
+      const screenSelect = document.getElementById('screen-select');
+      const screenGame = document.getElementById('screen-game');
+      const boardEl = document.getElementById('board');
+      const flagsLeftEl = document.getElementById('flagsLeft');
+      const timerEl = document.getElementById('timer');
+      const overlay = document.getElementById('overlay');
+      const stampEl = document.getElementById('stamp');
+      const reportText = document.getElementById('reportText');
+      const modeOpenBtn = document.getElementById('modeOpen');
+      const modeFlagBtn = document.getElementById('modeFlag');
+      const hintBtn = document.getElementById('hintBtn');
+      const hintModal = document.getElementById('hintModal');
+      const hintCancel = document.getElementById('hintCancel');
+      const hintConfirm = document.getElementById('hintConfirm');
+      const boardWrap = document.querySelector('.board-wrap');
+      const hintAmountInput = document.getElementById('hintAmount');
 
-  let MAX = 10;
-  let currentLevel = 1;
-  let board = [];
-  let mode = 'open';
-  let timerInterval = null;
-  let secondsElapsed = 0;
-  let busy = false;
-  
-  let isHintMode = false;
-  let currentHintPath = [];
+      let MAX = 10;
+      let currentLevel = 1;
+      let board = [];
+      let mode = 'open';
+      let timerInterval = null;
+      let secondsElapsed = 0;
+      let busy = false;
 
-  function rowLetter(r){ return String.fromCharCode(65 + r); }
+      let isHintMode = false;
+      let currentHintPaths = [];
+      let currentHintAmount = 3;
+      let hintOrigin = null;
 
-  async function api(path, body){
-    const response = await fetch(path, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body || {})
-    });
+      function rowLetter(r) { return String.fromCharCode(65 + r); }
 
-    if (!response.ok){
-      throw new Error('Falha ao conversar com o servidor local.');
-    }
+      async function api(path, body) {
+        const response = await fetch(path, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body || {})
+        });
 
-    const data = await response.json();
-    if (data.error){
-      throw new Error(data.error);
-    }
-
-    return data;
-  }
-
-  function showError(error){
-    stampEl.textContent = 'ERRO';
-    stampEl.className = 'stamp lose';
-    reportText.textContent = error.message || 'Não foi possivel conversar com o jogo em C.';
-    overlay.classList.remove('hidden');
-  }
-
-  async function startLevel(level){
-    if (busy) return;
-    busy = true;
-
-    try {
-      currentLevel = level;
-      overlay.classList.add('hidden');
-      const state = await api('/api/start', { level });
-      applyState(state);
-
-      secondsElapsed = 0;
-      timerEl.textContent = '00:00';
-      clearInterval(timerInterval);
-      startTimer();
-
-      mode = 'open';
-      setMode('open');
-      screenSelect.classList.add('hidden');
-      screenGame.classList.remove('hidden');
-    } catch (error) {
-      showError(error);
-    } finally {
-      busy = false;
-    }
-  }
-
-  function applyState(state){
-    currentHintPath = []; // Limpa o rastro quando o ecrã atualiza
-    MAX = state.max;
-    board = state.cells;
-    flagsLeftEl.textContent = state.flagsLeft;
-    sizeCells();
-    renderBoard();
-
-    if (state.status === 'won'){
-      winGame();
-    } else if (state.status === 'lost'){
-      loseGame();
-    }
-  }
-
-  function startTimer(){
-    timerInterval = setInterval(() => {
-      secondsElapsed++;
-      const m = String(Math.floor(secondsElapsed / 60)).padStart(2,'0');
-      const s = String(secondsElapsed % 60).padStart(2,'0');
-      timerEl.textContent = m + ':' + s;
-    }, 1000);
-  }
-
-  function stopTimer(){
-    clearInterval(timerInterval);
-    timerInterval = null;
-  }
-
-  function sizeCells(){
-    const espacoLivre = Math.min(window.innerWidth - 32, 560) - 44; 
-    const espacoSemGaps = espacoLivre - MAX; 
-    const cell = Math.max(14, Math.min(30, Math.floor(espacoSemGaps / (MAX + 1))));
-    
-    document.documentElement.style.setProperty('--cell', cell + 'px');
-    document.documentElement.style.setProperty('--label', cell + 'px'); 
-  }
-  window.addEventListener('resize', sizeCells);
-
-  async function executeHint(r, c){
-    isHintMode = false;
-    boardWrap.classList.remove('hint-active-mode');
-    if (busy) return;
-    busy = true;
-
-    try {
-      const data = await api('/api/hint', { row: r, col: c });
-      
-      if (data.type === 'hint' && data.path) {
-        currentHintPath = data.path;
-        renderBoard(); // Redesenha com o caminho
-      } else if (data.error) {
-        alert(data.error);
-      }
-    } catch (error) {
-      showError(error);
-    } finally {
-      busy = false;
-    }
-  }
-
-  async function openCell(r, c){
-    if (busy) return;
-    busy = true;
-
-    try {
-      applyState(await api('/api/open', { row:r, col:c }));
-    } catch (error) {
-      showError(error);
-    } finally {
-      busy = false;
-    }
-  }
-
-  async function toggleFlag(r, c){
-    if (busy) return;
-    busy = true;
-
-    try {
-      applyState(await api('/api/flag', { row:r, col:c }));
-    } catch (error) {
-      showError(error);
-    } finally {
-      busy = false;
-    }
-  }
-
-  function loseGame(){
-    stopTimer();
-    stampEl.textContent = 'DETONADO';
-    stampEl.className = 'stamp lose';
-    reportText.textContent = 'O setor explodiu. Missao encerrada pelo motor em C.';
-    overlay.classList.remove('hidden');
-  }
-
-  function winGame(){
-    stopTimer();
-    stampEl.textContent = 'DESARMADO';
-    stampEl.className = 'stamp win';
-    const m = String(Math.floor(secondsElapsed / 60)).padStart(2,'0');
-    const s = String(secondsElapsed % 60).padStart(2,'0');
-    reportText.textContent = 'Setor limpo em ' + m + ':' + s + '. Missao cumprida.';
-    overlay.classList.remove('hidden');
-  }
-
-  function setMode(m){
-    mode = m;
-    modeOpenBtn.classList.toggle('active', m === 'open');
-    modeFlagBtn.classList.toggle('active', m === 'flag');
-  }
-
-  function renderBoard(){
-    boardEl.style.gridTemplateColumns = 'var(--label) repeat(' + MAX + ', var(--cell))';
-    boardEl.innerHTML = '';
-
-    const corner = document.createElement('div');
-    corner.className = 'label-cell corner';
-    boardEl.appendChild(corner);
-    for (let c = 0; c < MAX; c++){
-      const lbl = document.createElement('div');
-      lbl.className = 'label-cell';
-      lbl.textContent = String(c + 1).padStart(2,'0');
-      boardEl.appendChild(lbl);
-    }
-
-    for (let r = 0; r < MAX; r++){
-      const rowLbl = document.createElement('div');
-      rowLbl.className = 'row-label';
-      rowLbl.textContent = rowLetter(r);
-      boardEl.appendChild(rowLbl);
-
-      for (let c = 0; c < MAX; c++){
-        const data = board[r][c];
-        const cellEl = document.createElement('div');
-        cellEl.tabIndex = 0;
-        cellEl.setAttribute('role','gridcell');
-        cellEl.setAttribute('aria-label', rowLetter(r) + (c+1));
-
-        let cls = 'cell ';
-        let content = '';
-
-        // Verifica se a casa faz parte do rastro da dica
-        const hintIndex = currentHintPath.findIndex(p => p.r === r && p.c === c);
-        if (hintIndex !== -1) {
-          cls += (hintIndex === currentHintPath.length - 1) ? 'hint-bomb ' : 'hint-path ';
+        if (!response.ok) {
+          throw new Error('Falha ao conversar com o servidor local.');
         }
 
-        if (data.revealed && data.bomb){
-          cls += data.exploded ? 'bomb-exploded' : 'bomb-revealed';
-          content = data.exploded ? '&#128165;' : '&#128163;';
-        } else if (data.revealed){
-          cls += 'revealed';
-          if (data.count > 0){
-            content = '<span class="n' + data.count + '">' + data.count + '</span>';
-          }
-        } else if (data.flagged){
-          cls += 'flagged';
-          content = '&#128681;';
-        } else {
-          cls += 'closed';
+        const data = await response.json();
+        if (data.error) {
+          throw new Error(data.error);
         }
 
-        cellEl.className = cls;
-        cellEl.innerHTML = content;
-
-        cellEl.addEventListener('click', () => {
-          if (isHintMode) {
-            executeHint(r, c);
-          } else if (mode === 'flag') {
-            toggleFlag(r, c);
-          } else {
-            openCell(r, c);
-          }
-        });
-        cellEl.addEventListener('contextmenu', (e) => {
-          e.preventDefault();
-          toggleFlag(r, c);
-        });
-        cellEl.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' '){
-            e.preventDefault();
-            if (isHintMode) executeHint(r, c);
-            else if (mode === 'flag') toggleFlag(r, c);
-            else openCell(r, c);
-          }
-        });
-
-        boardEl.appendChild(cellEl);
+        return data;
       }
-    }
-  }
 
-  document.querySelectorAll('.mission-card').forEach(btn => {
-    btn.addEventListener('click', () => startLevel(Number(btn.dataset.level)));
-  });
+      function showError(error) {
+        stampEl.textContent = 'ERRO';
+        stampEl.className = 'stamp lose';
+        reportText.textContent = error.message || 'Não foi possivel conversar com o jogo em C.';
+        overlay.classList.remove('hidden');
+      }
 
-  modeOpenBtn.addEventListener('click', () => setMode('open'));
-  modeFlagBtn.addEventListener('click', () => setMode('flag'));
+      async function startLevel(level) {
+        if (busy) return;
+        busy = true;
 
-  document.getElementById('resetBtn').addEventListener('click', () => {
-    startLevel(currentLevel);
-  });
+        try {
+          currentLevel = level;
+          overlay.classList.add('hidden');
+          const state = await api('/api/start', { level });
+          applyState(state);
 
-  document.getElementById('backBtn').addEventListener('click', () => {
-    stopTimer();
-    overlay.classList.add('hidden');
-    screenGame.classList.add('hidden');
-    screenSelect.classList.remove('hidden');
-  });
+          secondsElapsed = 0;
+          timerEl.textContent = '00:00';
+          clearInterval(timerInterval);
+          startTimer();
 
-  document.getElementById('playAgainBtn').addEventListener('click', () => {
-    startLevel(currentLevel);
-  });
+          mode = 'open';
+          setMode('open');
+          screenSelect.classList.add('hidden');
+          screenGame.classList.remove('hidden');
+        } catch (error) {
+          showError(error);
+        } finally {
+          busy = false;
+        }
+      }
 
-  // Eventos do Oráculo (Dica)
-  hintBtn.addEventListener('click', () => {
-    if (currentLevel) hintModal.classList.remove('hidden');
-  });
+      function applyState(state) {
+        currentHintPaths = []; //limpa os rastros sempre que a matriz atualiza
+        MAX = state.max;
+        board = state.cells;
+        flagsLeftEl.textContent = state.flagsLeft;
+        hintBtn.classList.remove('active');
+        hintOrigin = null;
+        sizeCells();
+        renderBoard();
 
-  hintCancel.addEventListener('click', () => {
-    hintModal.classList.add('hidden');
-  });
+        if (state.status === 'won') {
+          winGame();
+        } else if (state.status === 'lost') {
+          loseGame();
+        }
+      }
 
-  hintConfirm.addEventListener('click', () => {
-    hintModal.classList.add('hidden');
-    isHintMode = true;
-    boardWrap.classList.add('hint-active-mode');
-  });
+      function startTimer() {
+        timerInterval = setInterval(() => {
+          secondsElapsed++;
+          const m = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+          const s = String(secondsElapsed % 60).padStart(2, '0');
+          timerEl.textContent = m + ':' + s;
+        }, 1000);
+      }
 
-})();
-</script>
+      function stopTimer() {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+
+      function sizeCells() {
+        const espacoLivre = Math.min(window.innerWidth - 32, 560) - 44;
+        const espacoSemGaps = espacoLivre - MAX;
+        const cell = Math.max(14, Math.min(30, Math.floor(espacoSemGaps / (MAX + 1))));
+
+        document.documentElement.style.setProperty('--cell', cell + 'px');
+        document.documentElement.style.setProperty('--label', cell + 'px');
+      }
+      window.addEventListener('resize', sizeCells);
+
+      async function executeHint(r, c) {
+        isHintMode = false;
+        boardWrap.classList.remove('hint-active-mode');
+        hintBtn.classList.remove('active');
+        hintOrigin = { r: r, c: c };
+        if (busy) return;
+        busy = true;
+
+        try {
+          const data = await api('/api/hint', { row: r, col: c, x: currentHintAmount });
+
+          if (data.type === 'hint' && data.paths) {
+            currentHintPaths = data.paths;
+            renderBoard();
+          } else if (data.error) {
+            alert(data.error);
+          }
+        } catch (error) {
+          showError(error);
+        } finally {
+          busy = false;
+        }
+      }
+
+      async function openCell(r, c) {
+        if (busy) return;
+        busy = true;
+
+        try {
+          applyState(await api('/api/open', { row: r, col: c }));
+        } catch (error) {
+          showError(error);
+        } finally {
+          busy = false;
+        }
+      }
+
+      async function toggleFlag(r, c) {
+        if (busy) return;
+        busy = true;
+
+        try {
+          applyState(await api('/api/flag', { row: r, col: c }));
+        } catch (error) {
+          showError(error);
+        } finally {
+          busy = false;
+        }
+      }
+
+      function loseGame() {
+        stopTimer();
+        stampEl.textContent = 'DETONADO';
+        stampEl.className = 'stamp lose';
+        reportText.textContent = 'O setor explodiu. Missao encerrada pelo motor em C.';
+        overlay.classList.remove('hidden');
+      }
+
+      function winGame() {
+        stopTimer();
+        stampEl.textContent = 'DESARMADO';
+        stampEl.className = 'stamp win';
+        const m = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+        const s = String(secondsElapsed % 60).padStart(2, '0');
+        reportText.textContent = 'Setor limpo em ' + m + ':' + s + '. Missao cumprida.';
+        overlay.classList.remove('hidden');
+      }
+
+      function setMode(m) {
+        mode = m;
+        modeOpenBtn.classList.toggle('active', m === 'open');
+        modeFlagBtn.classList.toggle('active', m === 'flag');
+      }
+
+      function renderBoard() {
+        boardEl.style.gridTemplateColumns = 'var(--label) repeat(' + MAX + ', var(--cell))';
+        boardEl.innerHTML = '';
+
+        const corner = document.createElement('div');
+        corner.className = 'label-cell corner';
+        boardEl.appendChild(corner);
+        for (let c = 0; c < MAX; c++) {
+          const lbl = document.createElement('div');
+          lbl.className = 'label-cell';
+          lbl.textContent = String(c + 1).padStart(2, '0');
+          boardEl.appendChild(lbl);
+        }
+
+        for (let r = 0; r < MAX; r++) {
+          const rowLbl = document.createElement('div');
+          rowLbl.className = 'row-label';
+          rowLbl.textContent = rowLetter(r);
+          boardEl.appendChild(rowLbl);
+
+          for (let c = 0; c < MAX; c++) {
+            const data = board[r][c];
+            const cellEl = document.createElement('div');
+            cellEl.tabIndex = 0;
+            cellEl.setAttribute('role', 'gridcell');
+            cellEl.setAttribute('aria-label', rowLetter(r) + (c + 1));
+
+            let cls = 'cell ';
+            let content = '';
+
+            let isHint = false;
+            let isHintTarget = false;
+
+            for (const path of currentHintPaths) {
+              const idx = path.findIndex(p => p.r === r && p.c === c);
+              if (idx !== -1) {
+                isHint = true;
+                if (idx === path.length - 1) isHintTarget = true;
+              }
+            }
+
+            if (hintOrigin && hintOrigin.r === r && hintOrigin.c === c) {
+              cls += 'hint-origin ';
+            } else if (isHint) {
+              cls += isHintTarget ? 'hint-bomb ' : 'hint-path ';
+            }
+
+            if (data.revealed && data.bomb) {
+              cls += data.exploded ? 'bomb-exploded' : 'bomb-revealed';
+              content = data.exploded ? '&#128165;' : '&#128163;';
+            } else if (data.revealed) {
+              cls += 'revealed';
+              if (data.count > 0) {
+                content = '<span class="n' + data.count + '">' + data.count + '</span>';
+              }
+            } else if (data.flagged) {
+              cls += 'flagged';
+              content = '&#128681;';
+            } else {
+              cls += 'closed';
+            }
+
+            cellEl.className = cls;
+            cellEl.innerHTML = content;
+
+            cellEl.addEventListener('click', () => {
+              if (isHintMode) {
+                executeHint(r, c);
+              } else if (mode === 'flag') {
+                toggleFlag(r, c);
+              } else {
+                openCell(r, c);
+              }
+            });
+            cellEl.addEventListener('contextmenu', (e) => {
+              e.preventDefault();
+              toggleFlag(r, c);
+            });
+            cellEl.addEventListener('keydown', (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                if (isHintMode) executeHint(r, c);
+                else if (mode === 'flag') toggleFlag(r, c);
+                else openCell(r, c);
+              }
+            });
+
+            boardEl.appendChild(cellEl);
+          }
+        }
+      }
+
+      document.querySelectorAll('.mission-card').forEach(btn => {
+        btn.addEventListener('click', () => startLevel(Number(btn.dataset.level)));
+      });
+
+      modeOpenBtn.addEventListener('click', () => setMode('open'));
+      modeFlagBtn.addEventListener('click', () => setMode('flag'));
+
+      document.getElementById('resetBtn').addEventListener('click', () => {
+        startLevel(currentLevel);
+      });
+
+      document.getElementById('backBtn').addEventListener('click', () => {
+        stopTimer();
+        overlay.classList.add('hidden');
+        screenGame.classList.add('hidden');
+        screenSelect.classList.remove('hidden');
+      });
+
+      document.getElementById('playAgainBtn').addEventListener('click', () => {
+        startLevel(currentLevel);
+      });
+      hintBtn.addEventListener('click', () => {
+        if (currentLevel) hintModal.classList.remove('hidden');
+      });
+
+      hintCancel.addEventListener('click', () => {
+        hintModal.classList.add('hidden');
+      });
+
+      hintConfirm.addEventListener('click', () => {
+        hintModal.classList.add('hidden');
+        currentHintAmount = parseInt(hintAmountInput.value, 10) || 3;
+        isHintMode = true;
+        boardWrap.classList.add('hint-active-mode');
+        hintBtn.classList.add('active');
+      });
+
+    })();
+  </script>
 </body>
+
 </html>
